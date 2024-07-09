@@ -7,8 +7,11 @@ O projeto roda, por padrão, na porta 8080 e foi implementado o swagger para fac
 #### ENVIRONMENT
 
 Versão do Java: openjdk 17.0.11
+
 Versão do Springboot: 3.2.7
+
 Sistema Operacional usado no desenvolvimento: Ubuntu 22.04.4 LTS
+
 IDE usada no desenvovlimento: IntelliJ IDEA 2024.1.4 (Community Edition)
 
 Para rodar a aplicação, é necessário entrar na pasta raíz do projeto e executar os seguintes comandos: `mvn clean install && mvn spring-boot:run`
