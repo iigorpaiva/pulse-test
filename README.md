@@ -18,9 +18,13 @@ Para rodar a aplicação, é necessário entrar na pasta raíz do projeto e exec
 
 #### BANCO DE DADOS 
 
-As configurações do banco de dados são carregadas ao rodar a aplicação. Elas são encontradas no arquivo application.properties.
+As configurações do banco de dados são carregadas ao rodar a aplicação. Elas são encontradas no arquivo application.properties. E enquanto a aplicação estiver rodando, é possível acessar o banco através da seguinte URL: `http://localhost:8080/h2-console/`
 
 ![alt text](https://github.com/iigorpaiva/pulse-test/blob/master/src/images/application-properties.png?raw=true)
+
+![alt text](https://github.com/iigorpaiva/pulse-test/blob/master/src/images/h2-database.png?raw=true)
+
+![alt text](https://github.com/iigorpaiva/pulse-test/blob/master/src/images/database-produtos.png?raw=true)
 
 #### API 
 
