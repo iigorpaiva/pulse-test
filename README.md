@@ -40,6 +40,6 @@ Essa aplicação irá rodar em `localhost:8080` com os seguintes endpoints:
 
 #### TESTS
 
-Foram desenvolvidos testes unitários e testes de integração (teste de endpoints). Para executar os testes, mas ta acessar a pasta raíz do projeto e executar o comando: `mvn test`.
+Foram desenvolvidos testes unitários e testes de integração (teste de endpoints). Para executar os testes, basta acessar a pasta raíz do projeto e executar o comando: `mvn test`.
 
 Para facilitar a documentação e testes manuais, foi implementado o swagger. Enquanto o projeto estiver rodando, basta acessar a url `http://localhost:8080/swagger-ui/index.html` para ter acesso aos endpoints.
