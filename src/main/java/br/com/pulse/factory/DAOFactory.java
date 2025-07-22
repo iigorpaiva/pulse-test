@@ -1,7 +1,7 @@
 package br.com.pulse.factory;
 
-import br.com.pulse.dao.ProdutoDAO;
+import br.com.pulse.repository.ProdutoRepository;
 
 public interface DAOFactory {
-	ProdutoDAO getProdutoDAO();
+	ProdutoRepository getProdutoDAO();
 }

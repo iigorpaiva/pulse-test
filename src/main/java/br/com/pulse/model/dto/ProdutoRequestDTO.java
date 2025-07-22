@@ -1,4 +1,4 @@
-package br.com.pulse.dto;
+package br.com.pulse.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProdutoResponseDTO {
-	private Long id;
+public class ProdutoRequestDTO {
 	private String nome;
 	private String descricao;
 	private Integer quantidade;

@@ -1,9 +1,8 @@
 package br.com.pulse.unit;
 
-import br.com.pulse.dao.ProdutoDAO;
-import br.com.pulse.dto.ProdutoRequestDTO;
-import br.com.pulse.exception.produto.ProdutoInvalidoException;
-import br.com.pulse.exception.produto.ProdutoJaExisteException;
+import br.com.pulse.exception.produto.ProdutoException;
+import br.com.pulse.exception.produto.enums.TipoProdutoException;
+import br.com.pulse.model.dto.ProdutoRequestDTO;
 import br.com.pulse.factory.DAOFactory;
 import br.com.pulse.mapper.ProdutoMapper;
 import br.com.pulse.model.Produto;
@@ -20,94 +19,96 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 class ProdutoServiceImplTest {
-	
+
 	private static final Long PRODUTO_ID = 1L;
 	private static final String PRODUTO_NOME = "Coca-Cola";
 	private static final String PRODUTO_DESCRICAO = "Refrigerante de Cola";
 	private static final int PRODUTO_QUANTIDADE = 50;
-	
+
 	private static final String EXCEPTION_MENSAGEM_INVALIDA = "O produto não pode ser cadastrado devido a informações inválidas";
 	private static final String EXCEPTION_MENSAGEM_EXISTE = "O produto já existe no estoque";
-	
+
 	@Mock
 	private DAOFactory daoFactory;
-	
+
 	@Mock
 	private ProdutoMapper produtoMapper;
-	
+
 	@Mock
 	private ProdutoRepository produtoRepository;
-	
+
 	@InjectMocks
 	private ProdutoServiceImpl produtoService;
-	
+
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
 	}
-	
+
 	@Test
 	void testInserirProdutoComSucesso() {
-		ProdutoRequestDTO dto = new ProdutoRequestDTO();
-		dto.setNome(PRODUTO_NOME);
-		dto.setDescricao(PRODUTO_DESCRICAO);
-		dto.setQuantidade(PRODUTO_QUANTIDADE);
-		
-		Produto produtoMock = new Produto();
-		produtoMock.setId(PRODUTO_ID);
-		produtoMock.setNome(PRODUTO_NOME);
-		produtoMock.setDescricao(PRODUTO_DESCRICAO);
-		produtoMock.setQuantidade(PRODUTO_QUANTIDADE);
-		
-		when(produtoMapper.produtoRequestDtoToProduto(dto)).thenReturn(produtoMock);
-		
-		ProdutoDAO produtoDAO = mock(ProdutoDAO.class);
-		when(daoFactory.getProdutoDAO()).thenReturn(produtoDAO);
-		
-		when(produtoRepository.findByNome(PRODUTO_NOME)).thenReturn(null);
-		when(produtoDAO.save(any(Produto.class))).thenReturn(produtoMock);
-		
-		Produto produtoCriado = produtoService.inserirProduto(dto);
-		
+		ProdutoRequestDTO requestDTO = novoProdutoRequestDTO(PRODUTO_NOME, PRODUTO_DESCRICAO, PRODUTO_QUANTIDADE);
+		Produto produtoMockado = novoProduto(PRODUTO_ID, PRODUTO_NOME, PRODUTO_DESCRICAO, PRODUTO_QUANTIDADE);
+
+		when(produtoMapper.produtoRequestDtoToProduto(requestDTO)).thenReturn(produtoMockado);
+
+		ProdutoRepository produtoRepositoryMockado = mock(ProdutoRepository.class);
+		when(daoFactory.getProdutoDAO()).thenReturn(produtoRepositoryMockado);
+
+		when(this.produtoRepository.findByNome(PRODUTO_NOME)).thenReturn(null);
+		when(produtoRepositoryMockado.save(any(Produto.class))).thenReturn(produtoMockado);
+
+		Produto produtoCriado = produtoService.inserirProduto(requestDTO);
+
 		assertNotNull(produtoCriado);
 		assertEquals(PRODUTO_NOME, produtoCriado.getNome());
-		verify(produtoDAO, times(1)).save(any(Produto.class));
+		verify(produtoRepositoryMockado, times(1)).save(any(Produto.class));
 	}
 
-	
 	@Test
 	void testInserirProdutoComCamposInvalidos() {
-		
-		ProdutoRequestDTO dto = new ProdutoRequestDTO();
-		
-		ProdutoInvalidoException exception = assertThrows(ProdutoInvalidoException.class, () -> {
-			produtoService.inserirProduto(dto);
+		ProdutoRequestDTO requestDTO = novoProdutoRequestDTO(null, null, 0);
+
+		ProdutoException exception = assertThrows(ProdutoException.class, () -> {
+			produtoService.inserirProduto(requestDTO);
 		});
-		
+
+		assertEquals(TipoProdutoException.INVALIDO, exception.getTipo());
 		assertTrue(exception.getMessage().contains(EXCEPTION_MENSAGEM_INVALIDA));
 	}
-	
+
 	@Test
 	void testInserirProdutoJaExistente() {
-		ProdutoRequestDTO dto = new ProdutoRequestDTO();
-		dto.setNome(PRODUTO_NOME);
-		dto.setDescricao(PRODUTO_DESCRICAO);
-		dto.setQuantidade(PRODUTO_QUANTIDADE);
-		
-		ProdutoDAO produtoDAO = mock(ProdutoDAO.class);
-		when(daoFactory.getProdutoDAO()).thenReturn(produtoDAO);
-		
-		Produto produtoExistente = new Produto();
-		produtoExistente.setId(PRODUTO_ID);
-		produtoExistente.setNome(PRODUTO_NOME);
-		produtoExistente.setDescricao(PRODUTO_DESCRICAO);
-		produtoExistente.setQuantidade(PRODUTO_QUANTIDADE);
-		when(produtoDAO.findByNome(PRODUTO_NOME)).thenReturn(produtoExistente);
-		
-		ProdutoJaExisteException exception = assertThrows(ProdutoJaExisteException.class, () -> {
-			produtoService.inserirProduto(dto);
+		ProdutoRequestDTO requestDTO = novoProdutoRequestDTO(PRODUTO_NOME, PRODUTO_DESCRICAO, PRODUTO_QUANTIDADE);
+
+		ProdutoRepository produtoRepositoryMockado = mock(ProdutoRepository.class);
+		when(daoFactory.getProdutoDAO()).thenReturn(produtoRepositoryMockado);
+
+		Produto produtoExistente = novoProduto(PRODUTO_ID, PRODUTO_NOME, PRODUTO_DESCRICAO, PRODUTO_QUANTIDADE);
+		when(produtoRepositoryMockado.findByNome(PRODUTO_NOME)).thenReturn(produtoExistente);
+
+		ProdutoException exception = assertThrows(ProdutoException.class, () -> {
+			produtoService.inserirProduto(requestDTO);
 		});
-		
+
+		assertEquals(TipoProdutoException.JA_EXISTE, exception.getTipo());
 		assertTrue(exception.getMessage().contains(EXCEPTION_MENSAGEM_EXISTE));
+	}
+
+	private ProdutoRequestDTO novoProdutoRequestDTO(String nome, String descricao, int quantidade) {
+		ProdutoRequestDTO dto = new ProdutoRequestDTO();
+		dto.setNome(nome);
+		dto.setDescricao(descricao);
+		dto.setQuantidade(quantidade);
+		return dto;
+	}
+
+	private Produto novoProduto(Long id, String nome, String descricao, int quantidade) {
+		Produto produto = new Produto();
+		produto.setId(id);
+		produto.setNome(nome);
+		produto.setDescricao(descricao);
+		produto.setQuantidade(quantidade);
+		return produto;
 	}
 }
